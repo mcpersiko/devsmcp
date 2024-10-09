@@ -1,0 +1,15 @@
+FROM node:18-bookworm-slim
+
+RUN apt-get update && apt-get install -y --no-install-recommends ca-certificates curl make build-essential g++ git vim
+# Install Python in unattended mode.
+ARG CONTAINER_TIMEZONE=America/Denver
+RUN ln -snf /usr/share/zoneinfo/$CONTAINER_TIMEZONE /etc/localtime && echo $CONTAINER_TIMEZONE > /etc/timezone
+RUN apt-get install -y python3  && yarn config set python /usr/bin/python3
+RUN groupadd backstage && useradd -s /usr/bin/bash -c 'Backstage runner' -g backstage backstage && mkdir -p /home/backstage && chown backstage:backstage /home/backstage && chmod 755 /home/backstage && mkdir /app && chown backstage:backstage /app && chmod 755 /app
+## Run the rest as a non-root user.
+USER backstage
+# TODO:  How do I run this unattended, and set a version of Backstage other than "latest"?  So, 1. assign an application name on the CLI, and 2. select version
+WORKDIR /app
+#RUN npx -y @backstage/create-app@latest
+EXPOSE 3000 7007
+#ENTRYPOINT [/usr/bin/bash]
